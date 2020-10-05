@@ -50,7 +50,7 @@ static void filterData(DataMonitor& readMonitor, SortedResultMonitor& filterMoni
     for (int i = 0; i < n; i++)
     {
         Citizen citizen = readMonitor.pop();
-        if (filterMonitor.finished)
+        if (readMonitor.finished && readMonitor.objectCount == 0)
             break;
 
         //cout << "filterData " << citizen.name << " " << citizen.age << " " << citizen.income << endl;
