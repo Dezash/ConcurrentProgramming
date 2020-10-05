@@ -11,7 +11,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-const string DATA_FILE_1 = "IFF81_LaurinaviciusG_L1_dat_1.json";
+const string DATA_FILE_1 = "large.json";
 const string DATA_FILE_2 = "IFF81_LaurinaviciusG_L1_dat_2.json";
 const string DATA_FILE_3 = "IFF81_LaurinaviciusG_L1_dat_3.json";
 const string RES_FILE = "IFF81_LaurinaviciusG_L1_rez.txt";
@@ -45,39 +45,27 @@ Citizen* getCitizens(string fileName, int& n)
 }
 
 
-static void filterData(DataMonitor& readMonitor, SortedResultMonitor& filterMonitor)
+static void filterData(DataMonitor& readMonitor, SortedResultMonitor& filterMonitor, int n)
 {
-    while (!readMonitor.finished || readMonitor.objectCount > 0)
+    for (int i = 0; i < n; i++)
     {
-        if (readMonitor.objectCount == 0)
-            continue;
-
         Citizen citizen = readMonitor.pop();
-        if (citizen.age != 0)
-        {
-            //cout << "filterData " << citizen.name << " " << citizen.age << " " << citizen.income << endl;
+        if (filterMonitor.finished)
+            break;
 
-            if (citizen.income >= 40500 && citizen.income < 118000)
-            {
-                filterMonitor.insertSorted(citizen);
-            }
-                
+        //cout << "filterData " << citizen.name << " " << citizen.age << " " << citizen.income << endl;
+
+        if (citizen.income >= 40500 && citizen.income < 118000)
+        {
+            filterMonitor.insertSorted(citizen);
         }
+
     }
 
     filterMonitor.finished = true;
     cv.notify_all();
 }
 
-static void writeData(DataMonitor& monitor, Citizen* citizens, int n)
-{
-    for (int i = 0; i < n; i++)
-    {
-        //cout << "writeData " << citizens[i].name << " " << citizens[i].age << " " << citizens[i].income << endl;
-        monitor.add(citizens[i]);
-    }
-    monitor.finished = true;
-}
 
 static void printResults(const string fileName, SortedResultMonitor& filterMonitor)
 {
@@ -101,19 +89,29 @@ int main()
     DataMonitor readMonitor(n / 2);
     SortedResultMonitor filterMonitor(n);
 
+    printf("Time taken: %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
+
     thread threads[THREAD_COUNT];
 
-    threads[0] = thread(writeData, ref(readMonitor), citizens, n);
-    for (int i = 1; i < THREAD_COUNT; i++)
+    for (int i = 0; i < THREAD_COUNT; i++)
     {
-        threads[i] = thread(filterData, ref(readMonitor), ref(filterMonitor));
+        threads[i] = thread(filterData, ref(readMonitor), ref(filterMonitor), n);
     }
+
+    for (int i = 0; i < n; i++)
+    {
+        //cout << "writeData " << citizens[i].name << " " << citizens[i].age << " " << citizens[i].income << endl;
+        readMonitor.add(citizens[i]);
+    }
+    readMonitor.finished = true;
 
     mutex lock;
     unique_lock<mutex> guard(lock);
     
 
     cv.wait(guard, [&] {return filterMonitor.finished;});
+
+    printf("Time taken: %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
 
     for (int i = 0; i < THREAD_COUNT; i++)
     {

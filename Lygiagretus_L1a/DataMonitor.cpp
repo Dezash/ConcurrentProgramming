@@ -14,13 +14,9 @@ Citizen DataMonitor::pop()
     cv.wait(guard, [&] {return available;});
     available = false;
 
-    Citizen citizen;
-    if (objectCount > 0)
-    {
-        citizen = objects[--objectCount];
-        objects[objectCount] = Citizen();
-    }
+    cv.wait(guard, [&] {return finished || objectCount > 0;});
 
+    Citizen citizen = objectCount > 0 ? objects[--objectCount] : Citizen();
 
     available = true;
     cv.notify_all();
