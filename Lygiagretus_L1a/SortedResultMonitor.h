@@ -1,7 +1,7 @@
 #pragma once
 #include <mutex>
 #include <condition_variable>
-#include "Citizen.h"
+#include "CitizenComputed.h"
 
 using namespace std;
 
@@ -11,7 +11,7 @@ private:
     mutex lock;
     bool available;
     condition_variable cv;
-    Citizen* objects;
+    CitizenComputed* objects;
     int size;
 
 public:
@@ -20,7 +20,7 @@ public:
 
     SortedResultMonitor(int n) : objectCount(0), size(n), available(true), finished(false)
     {
-        objects = new Citizen[n];
+        objects = new CitizenComputed[n];
     }
 
     ~SortedResultMonitor()
@@ -28,9 +28,9 @@ public:
         delete[] objects;
     }
 
-    Citizen& operator[](int);
+    CitizenComputed& operator[](int);
 
-    void insertSorted(Citizen);
+    void insertSorted(CitizenComputed);
 
     int search(int, int, Citizen);
 

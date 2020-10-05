@@ -1,6 +1,6 @@
 #include "SortedResultMonitor.h"
 
-Citizen& SortedResultMonitor::operator[](int index)
+CitizenComputed& SortedResultMonitor::operator[](int index)
 {
     if (index < 0 || index >= size) {
         throw out_of_range("Index out of array bounds");
@@ -14,15 +14,15 @@ int SortedResultMonitor::search(int first, int last, Citizen x) {
     while (first < last)
     {
         mid = (first + last) / 2;
-        if (objects[mid] == x)
+        if (objects[mid].citizen == x)
             return mid;
-        else if (objects[mid] > x)
+        else if (objects[mid].citizen > x)
             last = mid - 1;
         else
             first = mid + 1;
     }
 
-    if (objects[first] > x)
+    if (objects[first].citizen > x)
         return first;
     else if (first == objectCount)
         return objectCount;
@@ -30,13 +30,13 @@ int SortedResultMonitor::search(int first, int last, Citizen x) {
         return first + 1;
 }
 
-void SortedResultMonitor::insertSorted(Citizen newObject)
+void SortedResultMonitor::insertSorted(CitizenComputed newObject)
 {
     unique_lock<mutex> guard(lock);
     cv.wait(guard, [&] {return available;});
     available = false;
 
-    int index = search(0, objectCount, newObject);
+    int index = search(0, objectCount, newObject.citizen);
     for (int i = objectCount - 1; i >= index; i--)
         objects[i + 1] = objects[i];
 

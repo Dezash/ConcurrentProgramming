@@ -7,11 +7,14 @@
 #include "Citizen.h"
 #include "DataMonitor.h"
 #include "SortedResultMonitor.h"
+#include <openssl/sha.h>
+#include <sstream>
+
 
 using namespace std;
 using json = nlohmann::json;
 
-const string DATA_FILE_1 = "large.json";
+const string DATA_FILE_1 = "IFF81_LaurinaviciusG_L1_dat_1.json";
 const string DATA_FILE_2 = "IFF81_LaurinaviciusG_L1_dat_2.json";
 const string DATA_FILE_3 = "IFF81_LaurinaviciusG_L1_dat_3.json";
 const string RES_FILE = "IFF81_LaurinaviciusG_L1_rez.txt";
@@ -44,6 +47,20 @@ Citizen* getCitizens(string fileName, int& n)
     return citizens;
 }
 
+string sha256(const string str)
+{
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+    SHA256_Update(&sha256, str.c_str(), str.size());
+    SHA256_Final(hash, &sha256);
+    stringstream ss;
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+    {
+        ss << hex << setw(2) << setfill('0') << (int)hash[i];
+    }
+    return ss.str();
+}
 
 static void filterData(DataMonitor& readMonitor, SortedResultMonitor& filterMonitor, int n)
 {
@@ -57,7 +74,10 @@ static void filterData(DataMonitor& readMonitor, SortedResultMonitor& filterMoni
 
         if (citizen.income >= 40500 && citizen.income < 118000)
         {
-            filterMonitor.insertSorted(citizen);
+            string hash = sha256(citizen.name + to_string(citizen.age) + to_string(citizen.income));
+
+            auto computed = CitizenComputed(citizen, hash);
+            filterMonitor.insertSorted(computed);
         }
 
     }
@@ -70,11 +90,12 @@ static void filterData(DataMonitor& readMonitor, SortedResultMonitor& filterMoni
 static void printResults(const string fileName, SortedResultMonitor& filterMonitor)
 {
     ofstream out(fileName);
-    out << left << setw(30) << "Name|" << setw(10) << "Age|" << setw(10) << "Income|" << '\n';
+    out << left << setw(30) << "Name|" << setw(10) << "Age|" << setw(10) << "Income|" << setw(10) << "SHA256|" << '\n';
     for (int i = 0; i < filterMonitor.objectCount; i++)
     {
-        Citizen citizen = filterMonitor[i];
-        out << left << setw(30) << citizen.name << setw(10) << citizen.age << setw(10) << citizen.income << '\n';
+        CitizenComputed computed = filterMonitor[i];
+        Citizen citizen = computed.citizen;
+        out << left << setw(30) << citizen.name << setw(10) << citizen.age << setw(10) << citizen.income << setw(10) << computed.hash << '\n';
     }
     out.close();
 }
