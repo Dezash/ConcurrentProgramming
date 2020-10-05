@@ -11,6 +11,9 @@ int Citizen::compareTo(Citizen const& other) const
     else if (age > other.age)
         return 1;
 
+    if (income == other.income)
+        return 0;
+
     return income < other.income ? -1 : 1;
 }
 

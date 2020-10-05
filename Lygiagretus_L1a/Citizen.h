@@ -34,4 +34,9 @@ public:
     {
         return compareTo(rhs) == 1;
     }
+
+    bool operator == (Citizen const& rhs) const
+    {
+        return compareTo(rhs) == 0;
+    }
 };
