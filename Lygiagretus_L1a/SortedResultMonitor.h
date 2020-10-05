@@ -12,12 +12,11 @@ private:
     bool available;
     condition_variable cv;
     Citizen* objects;
-    void insert(Citizen, int);
+    int size;
 
 public:
     bool finished;
     int objectCount;
-    int size;
 
     SortedResultMonitor(int n) : objectCount(0), size(n), available(true), finished(false)
     {
@@ -32,6 +31,8 @@ public:
     Citizen& operator[](int);
 
     void insertSorted(Citizen);
+
+    int search(int, int, Citizen);
 
     void remove(int);
 };

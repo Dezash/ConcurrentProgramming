@@ -8,13 +8,26 @@ Citizen& SortedResultMonitor::operator[](int index)
     return objects[index];
 }
 
-void SortedResultMonitor::insert(Citizen citizen, int index)
-{
-    for (int i = objectCount - 1; i >= index; i--)
-        objects[i + 1] = objects[i];
 
-    objects[index] = citizen;
-    objectCount++;
+int SortedResultMonitor::search(int first, int last, Citizen x) {
+    int mid;
+    while (first < last)
+    {
+        mid = (first + last) / 2;
+        if (objects[mid] == x)
+            return mid;
+        else if (objects[mid] > x)
+            last = mid - 1;
+        else
+            first = mid + 1;
+    }
+
+    if (objects[first] > x)
+        return first;
+    else if (first == objectCount)
+        return objectCount;
+    else
+        return first + 1;
 }
 
 void SortedResultMonitor::insertSorted(Citizen newObject)
@@ -23,22 +36,12 @@ void SortedResultMonitor::insertSorted(Citizen newObject)
     cv.wait(guard, [&] {return available;});
     available = false;
 
-    //this_thread::sleep_for(std::chrono::milliseconds(50));
+    int index = search(0, objectCount, newObject);
+    for (int i = objectCount - 1; i >= index; i--)
+        objects[i + 1] = objects[i];
 
-    bool found = false;
-    for (int i = 0; i < objectCount; i++)
-    {
-        if (newObject < objects[i])
-        {
-            insert(newObject, i);
-            found = true;
-            break;
-        }
-    }
-
-    if (!found)
-        insert(newObject, objectCount);
-
+    objects[index] = newObject;
+    objectCount++;
 
     available = true;
     cv.notify_all();
