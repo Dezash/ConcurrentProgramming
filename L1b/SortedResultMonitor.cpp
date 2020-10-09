@@ -32,32 +32,13 @@ int SortedResultMonitor::search(int first, int last, Citizen x) {
 
 void SortedResultMonitor::insertSorted(CitizenComputed newObject)
 {
-    unique_lock<mutex> guard(lock);
-    cv.wait(guard, [&] {return available;});
-    available = false;
+#pragma omp critical (writeLock)
+    {
+        int index = search(0, objectCount, newObject.citizen);
+        for (int i = objectCount - 1; i >= index; i--)
+            objects[i + 1] = objects[i];
 
-    int index = search(0, objectCount, newObject.citizen);
-    for (int i = objectCount - 1; i >= index; i--)
-        objects[i + 1] = objects[i];
-
-    objects[index] = newObject;
-    objectCount++;
-
-    available = true;
-    cv.notify_all();
-}
-
-void SortedResultMonitor::remove(int index)
-{
-    unique_lock<mutex> guard(lock);
-    cv.wait(guard, [&] {return available;});
-    available = false;
-
-    for (int i = index; i < objectCount - 1; i++)
-        objects[i] = objects[i + 1];
-
-    objectCount--;
-
-    available = true;
-    cv.notify_all();
+        objects[index] = newObject;
+        objectCount++;
+    }
 }

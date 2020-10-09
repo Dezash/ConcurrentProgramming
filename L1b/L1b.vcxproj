@@ -18,6 +18,19 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Citizen.h" />
+    <ClInclude Include="CitizenComputed.h" />
+    <ClInclude Include="DataMonitor.h" />
+    <ClInclude Include="SortedResultMonitor.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Citizen.cpp" />
+    <ClCompile Include="CitizenComputed.cpp" />
+    <ClCompile Include="DataMonitor.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="SortedResultMonitor.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{8B824873-5B60-4F64-827E-051B6D2F6A5F}</ProjectGuid>
@@ -89,7 +102,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <ConformanceMode>false</ConformanceMode>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
@@ -147,18 +160,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\Lygiagretus_L1a\Citizen.cpp" />
-    <ClCompile Include="..\Lygiagretus_L1a\DataMonitor.cpp" />
-    <ClCompile Include="..\Lygiagretus_L1a\main.cpp" />
-    <ClCompile Include="..\Lygiagretus_L1a\SortedResultMonitor.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\Lygiagretus_L1a\Citizen.h" />
-    <ClInclude Include="..\Lygiagretus_L1a\DataMonitor.h" />
-    <ClInclude Include="..\Lygiagretus_L1a\nlohmann\json.hpp" />
-    <ClInclude Include="..\Lygiagretus_L1a\SortedResultMonitor.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

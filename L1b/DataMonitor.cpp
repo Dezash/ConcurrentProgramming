@@ -1,24 +1,30 @@
 #include "DataMonitor.h"
+#include <iostream>
 
 void DataMonitor::add(Citizen newObject)
 {
-    unique_lock<mutex> guard(lock);
-    cv.wait(guard, [&] {return objectCount != size;});
-    objects[objectCount++] = newObject;
-    cv.notify_all();
+    while (objectCount == size)
+    {
+    }
+
+#pragma omp critical
+    {
+        objects[objectCount++] = newObject;
+    }
 }
 
 Citizen DataMonitor::pop()
 {
-    std::unique_lock<mutex> guard(lock);
-    cv.wait(guard, [&] {return available;});
-    available = false;
+    Citizen citizen;
+    while (objectCount == 0 && !finished)
+    {
+    }
+    
+#pragma omp critical
+    {
+        if (objectCount > 0)
+            citizen = objects[--objectCount];
+    }
 
-    cv.wait(guard, [&] {return finished || objectCount > 0;});
-
-    Citizen citizen = objectCount > 0 ? objects[--objectCount] : Citizen();
-
-    available = true;
-    cv.notify_all();
     return citizen;
 }

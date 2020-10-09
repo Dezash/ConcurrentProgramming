@@ -33,6 +33,4 @@ public:
     void insertSorted(CitizenComputed);
 
     int search(int, int, Citizen);
-
-    void remove(int);
 };
