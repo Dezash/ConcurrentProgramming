@@ -88,7 +88,7 @@ static void filterData(DataMonitor& readMonitor, SortedResultMonitor& filterMoni
 }
 
 
-static void printResults(const string fileName, SortedResultMonitor& filterMonitor)
+static void printResults(const string fileName, SortedResultMonitor& filterMonitor, int n)
 {
     ofstream out(fileName);
     out << left << setw(30) << "Name|" << setw(10) << "Age|" << setw(10) << "Income|" << setw(10) << "SHA256|" << '\n';
@@ -98,6 +98,8 @@ static void printResults(const string fileName, SortedResultMonitor& filterMonit
         Citizen citizen = computed.citizen;
         out << left << setw(30) << citizen.name << setw(10) << citizen.age << setw(10) << citizen.income << setw(10) << computed.hash << '\n';
     }
+
+    out << "Is pradziu duomenu: " << n << "\nAtfiltruota duomenu: " << filterMonitor.objectCount;
     out.close();
 }
 
@@ -140,7 +142,7 @@ int main()
         threads[i].join();
     }
 
-    printResults(RES_FILE, filterMonitor);
+    printResults(RES_FILE, filterMonitor, n);
     delete[] citizens;
 
     printf("Time taken: %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
