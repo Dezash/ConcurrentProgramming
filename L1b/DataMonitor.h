@@ -22,7 +22,7 @@ public:
         delete[] objects;
     }
 
-    void add(Citizen);
+    bool add(Citizen);
 
-    Citizen pop();
+    Citizen pop(bool&);
 };

@@ -64,7 +64,11 @@ static void filterData(DataMonitor& readMonitor, SortedResultMonitor& filterMoni
 {
     while (!readMonitor.finished || readMonitor.objectCount > 0)
     {
-        Citizen citizen = readMonitor.pop();
+        bool success = false;
+        Citizen citizen = readMonitor.pop(success);
+
+        if (!success)
+            continue;
         //cout << "filterData " << citizen.name << " " << citizen.age << " " << citizen.income << endl;
 
         if (citizen.income >= 40500 && citizen.income < 118000)
@@ -82,7 +86,7 @@ static void filterData(DataMonitor& readMonitor, SortedResultMonitor& filterMoni
 }
 
 
-static void printResults(const string fileName, SortedResultMonitor& filterMonitor)
+static void printResults(const string fileName, SortedResultMonitor& filterMonitor, int n)
 {
     ofstream out(fileName);
     out << left << setw(30) << "Name|" << setw(10) << "Age|" << setw(10) << "Income|" << setw(10) << "SHA256|" << '\n';
@@ -92,6 +96,8 @@ static void printResults(const string fileName, SortedResultMonitor& filterMonit
         Citizen citizen = computed.citizen;
         out << left << setw(30) << citizen.name << setw(10) << citizen.age << setw(10) << citizen.income << setw(10) << computed.hash << '\n';
     }
+
+    out << "Is pradziu duomenu: " << n << "\nAtfiltruota duomenu: " << filterMonitor.objectCount;
     out.close();
 }
 
@@ -104,8 +110,6 @@ int main()
 
     DataMonitor readMonitor(n / 2);
     SortedResultMonitor filterMonitor(n);
-
-    printf("Time taken: %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
 
     omp_set_num_threads(THREAD_COUNT);
 
@@ -123,7 +127,8 @@ int main()
             for (int i = 0; i < n; i++)
             {
                 //cout << "writeData " << citizens[i].name << " " << citizens[i].age << " " << citizens[i].income << endl;
-                readMonitor.add(citizens[i]);
+                while(!readMonitor.add(citizens[i]) && !readMonitor.finished)
+                { }
             }
             readMonitor.finished = true;
             cout << "Read monitor finished\n";
@@ -132,10 +137,7 @@ int main()
             filterData(readMonitor, filterMonitor, n);
     }
 
-
-    printf("Time taken: %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
-
-    printResults(RES_FILE, filterMonitor);
+    printResults(RES_FILE, filterMonitor, n);
     delete[] citizens;
 
     printf("Time taken: %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);

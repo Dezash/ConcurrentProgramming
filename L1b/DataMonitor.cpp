@@ -1,24 +1,30 @@
 #include "DataMonitor.h"
 #include <iostream>
 
-void DataMonitor::add(Citizen newObject)
+bool DataMonitor::add(Citizen newObject)
 {
-    while (objectCount == size)
+    if (objectCount == size)
     {
+        return false;
     }
 
 #pragma omp critical
     {
         objects[objectCount++] = newObject;
     }
+
+    return true;
 }
 
-Citizen DataMonitor::pop()
+Citizen DataMonitor::pop(bool &success)
 {
     Citizen citizen;
-    while (objectCount == 0 && !finished)
+    if (objectCount == 0 && !finished)
     {
+        success = false;
+        return citizen;
     }
+    
     
 #pragma omp critical
     {
@@ -26,5 +32,6 @@ Citizen DataMonitor::pop()
             citizen = objects[--objectCount];
     }
 
+    success = true;
     return citizen;
 }
